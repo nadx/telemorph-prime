@@ -1,0 +1,87 @@
+# Telemorph-Prime Ingestion Service Configuration
+
+# Server configuration
+server:
+  grpc_endpoint: "0.0.0.0:4317"
+  http_endpoint: "0.0.0.0:4318"
+  health_endpoint: "0.0.0.0:8080"
+  read_timeout: "5s"
+  write_timeout: "10s"
+
+# Kafka configuration
+kafka:
+  brokers:
+    - "kafka:29092"
+  topics:
+    traces: "otel.traces"
+    metrics: "otel.metrics"
+    logs: "otel.logs"
+  producer:
+    required_acks: "WaitForAll"
+    retry_max: 3
+    compression: "snappy"
+    batch_size: 16384
+    batch_timeout: "10ms"
+
+# Logging configuration
+logging:
+  level: "info"  # debug, info, warn, error
+  format: "json"  # json, console
+  development: false
+  sampling:
+    initial: 100
+    thereafter: 100
+
+# OpenTelemetry configuration
+opentelemetry:
+  service_name: "telemorph-ingestion-service"
+  service_version: "1.0.0"
+  environment: "development"
+  
+  # Tracing configuration
+  tracing:
+    enabled: true
+    exporter: "console"  # console, otlp, kafka, none
+    otlp:
+      endpoint: "http://localhost:4317"
+      protocol: "grpc"  # grpc, http
+      insecure: true
+    sampling:
+      type: "always_on"  # always_on, always_off, traceidratio, parentbased_traceidratio
+      ratio: 1.0  # 0.0 to 1.0
+    
+  # Metrics configuration
+  metrics:
+    enabled: true
+    exporter: "kafka"  # otlp, kafka, console, none
+    otlp:
+      endpoint: "http://localhost:4317"
+      protocol: "grpc"
+      insecure: true
+    interval: "10s"
+    
+  # Resource attributes
+  resource:
+    attributes:
+      - key: "service.name"
+        value: "telemorph-ingestion-service"
+      - key: "service.version"
+        value: "1.0.0"
+      - key: "deployment.environment"
+        value: "development"
+      - key: "service.instance.id"
+        value: "ingestion-1"
+
+# Health check configuration
+health:
+  enabled: true
+  endpoint: "/health"
+  readiness_endpoint: "/ready"
+  liveness_endpoint: "/live"
+  metrics_endpoint: "/metrics"
+
+# Performance configuration
+performance:
+  max_concurrent_requests: 1000
+  request_timeout: "30s"
+  graceful_shutdown_timeout: "30s"

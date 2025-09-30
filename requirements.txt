@@ -1,0 +1,2 @@
+# Python dependencies for Telemorph-Prime testing
+kafka-python==2.0.2
